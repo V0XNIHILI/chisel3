@@ -71,7 +71,7 @@ class GCDSerializableModule(val parameter: GCDSerializableModuleParameter)
 }
 ```
 using `write` function in `upickle`:
-```scala mdoc
+```scala
 val j = upickle.default.write(
   SerializableModuleGenerator(
     classOf[GCDSerializableModule],
@@ -82,10 +82,96 @@ println(j)
 ```
 
 read from json string and elaborate the Module:
-```scala mdoc:verilog
+```scala
 println(chisel3.stage.ChiselStage.emitVerilog(
   upickle.default.read[SerializableModuleGenerator[GCDSerializableModule, GCDSerializableModuleParameter]](
     ujson.read(j)
   ).module()
 ))
+```
+```verilog
+module GCDSerializableModule(
+  input         clock,
+  input         reset,
+  input  [31:0] io_a,
+  input  [31:0] io_b,
+  input         io_e,
+  output [31:0] io_z
+);
+`ifdef RANDOMIZE_REG_INIT
+  reg [31:0] _RAND_0;
+  reg [31:0] _RAND_1;
+  reg [31:0] _RAND_2;
+`endif
+  reg [31:0] x;
+  reg [31:0] y;
+  reg [31:0] z;
+  wire [31:0] _x_T_1 = x - y;
+  wire [31:0] _y_T_1 = y - x;
+  assign io_z = z;
+  always @(posedge clock) begin
+    if (x != y) begin
+      if (x > y) begin
+        x <= _x_T_1;
+      end
+    end
+    if (x != y) begin
+      if (!(x > y)) begin
+        y <= _y_T_1;
+      end
+    end
+    if (!(x != y)) begin
+      z <= x;
+    end
+  end
+// Register and memory initialization
+`ifdef RANDOMIZE_GARBAGE_ASSIGN
+`define RANDOMIZE
+`endif
+`ifdef RANDOMIZE_INVALID_ASSIGN
+`define RANDOMIZE
+`endif
+`ifdef RANDOMIZE_REG_INIT
+`define RANDOMIZE
+`endif
+`ifdef RANDOMIZE_MEM_INIT
+`define RANDOMIZE
+`endif
+`ifndef RANDOM
+`define RANDOM $random
+`endif
+`ifdef RANDOMIZE_MEM_INIT
+  integer initvar;
+`endif
+`ifndef SYNTHESIS
+`ifdef FIRRTL_BEFORE_INITIAL
+`FIRRTL_BEFORE_INITIAL
+`endif
+initial begin
+  `ifdef RANDOMIZE
+    `ifdef INIT_RANDOM
+      `INIT_RANDOM
+    `endif
+    `ifndef VERILATOR
+      `ifdef RANDOMIZE_DELAY
+        #`RANDOMIZE_DELAY begin end
+      `else
+        #0.002 begin end
+      `endif
+    `endif
+`ifdef RANDOMIZE_REG_INIT
+  _RAND_0 = {1{`RANDOM}};
+  x = _RAND_0[31:0];
+  _RAND_1 = {1{`RANDOM}};
+  y = _RAND_1[31:0];
+  _RAND_2 = {1{`RANDOM}};
+  z = _RAND_2[31:0];
+`endif
+  `endif
+end
+`ifdef FIRRTL_AFTER_INITIAL
+`FIRRTL_AFTER_INITIAL
+`endif
+`endif
+endmodule
 ```
