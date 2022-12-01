@@ -200,10 +200,8 @@ abstract class Module(implicit moduleCompileOptions: CompileOptions) extends Raw
 }
 
 package experimental {
-
-  import chisel3.internal.requireIsChiselType // Fix ambiguous import
-
   object IO {
+<<<<<<< HEAD
 
     /** Constructs a port for the current Module
       *
@@ -236,6 +234,11 @@ package experimental {
         }
       module.bindIoInPlace(iodefClone)
       iodefClone
+=======
+    @deprecated("chisel3.experimental.IO is deprecated, use chisel3.IO instead", "Chisel 3.5")
+    def apply[T <: Data](iodef: => T)(implicit sourceInfo: SourceInfo, compileOptions: CompileOptions): T = {
+      chisel3.IO.apply(iodef)
+>>>>>>> de25bf65 (Unify BaseModule.IO and chisel3.experimental.IO into chisel3.IO (#2863))
     }
   }
 }
@@ -753,7 +756,13 @@ package experimental {
       * TODO(twigg): Specifically walk the Data definition to call out which nodes
       * are problematic.
       */
+<<<<<<< HEAD
     protected def IO[T <: Data](iodef: T): T = chisel3.experimental.IO.apply(iodef)
+=======
+    protected def IO[T <: Data](iodef: => T)(implicit sourceInfo: SourceInfo, compileOptions: CompileOptions): T = {
+      chisel3.IO.apply(iodef)
+    }
+>>>>>>> de25bf65 (Unify BaseModule.IO and chisel3.experimental.IO into chisel3.IO (#2863))
 
     //
     // Internal Functions
