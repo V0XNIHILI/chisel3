@@ -71,14 +71,13 @@ class GCDSerializableModule(val parameter: GCDSerializableModuleParameter)
 }
 ```
 using `write` function in `upickle`:
-```scala
+```scala mdoc:silent
 val j = upickle.default.write(
   SerializableModuleGenerator(
     classOf[GCDSerializableModule],
     GCDSerializableModuleParameter(32)
   )
 )
-println(j)
 ```
 
 read from json string and elaborate the Module:
